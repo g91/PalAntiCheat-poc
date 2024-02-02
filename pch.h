@@ -19,12 +19,5 @@
 #include <vector>
 #include <chrono>
 
-//	INTERNET
-#include <Wininet.h>
-#pragma comment(lib, "ws2_32.lib")
-#pragma comment(lib, "wininet.lib")
-
-// MINHOOK
-#include "libs/MinHook/MinHook.h"
 
 #endif //PCH_H
