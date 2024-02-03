@@ -62,6 +62,7 @@ void  HookedProcessEvent(const SDK::UObject* Object, class SDK::UFunction* Funct
         if (!strcmp(Function->GetFullName().c_str(), "Function Pal.PalNetworkPlayerComponent.RequestAddItem_ToServer")) {
             SDK::Params::UPalNetworkPlayerComponent_RequestAddItem_ToServer_Params* AddItemParms = (SDK::Params::UPalNetworkPlayerComponent_RequestAddItem_ToServer_Params*)Parms;
             logToFile("app.log", "[CMD::ProcessEventHook] Function  = RequestAddItem_ToServer Cheater ItemId: %i Count: %i  Object: 0x%X\n", AddItemParms->StaticItemId, AddItemParms->Count, Object);
+            return;
         }
         else if (!strcmp(Function->GetFullName().c_str(), "Function Pal.PalNetworkIndividualComponent.UpdateCharacterNickName_ToServer")) {
             SDK::Params::UPalNetworkIndividualComponent_UpdateCharacterNickName_ToServer_Params* NewParms = (SDK::Params::UPalNetworkIndividualComponent_UpdateCharacterNickName_ToServer_Params*)Parms;

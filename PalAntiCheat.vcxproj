@@ -163,6 +163,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="initialize.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="SDK.hpp" />
   </ItemGroup>
