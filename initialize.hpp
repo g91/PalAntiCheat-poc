@@ -195,6 +195,8 @@ void  HookedProcessEvent(const SDK::UObject* Object, class SDK::UFunction* Funct
 }
 
 
+//credit: VeroFess
+//https://github.com/VeroFess/PalWorld-Server-Unoffical-Api/blob/main/src/hooks/spawn_play_actor.cpp
 SDK::APlayerController* spawn_play_actor_proxy(SDK::UWorld* that, SDK::UPlayer* player, SDK::ENetRole role, const SDK::FURL* url, const SDK::FUniqueNetIdRepl* uid, SDK::FString* error, uint8_t index) {
     static SDK::UPalUtility* utility = nullptr;
     if (!utility) {
