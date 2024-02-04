@@ -59,18 +59,35 @@ bool containsSegment(const std::string& text, const std::string& segment) {
 
 void  HookedProcessEvent(const SDK::UObject* Object, class SDK::UFunction* Function, void* Parms) 
 {
+        //add item fix  it does not seem that this function is called by the client at all unless it's cheating so just returning disables the function 
         if (!strcmp(Function->GetFullName().c_str(), "Function Pal.PalNetworkPlayerComponent.RequestAddItem_ToServer")) {
             SDK::Params::UPalNetworkPlayerComponent_RequestAddItem_ToServer_Params* AddItemParms = (SDK::Params::UPalNetworkPlayerComponent_RequestAddItem_ToServer_Params*)Parms;
-            logToFile("app.log", "[CMD::ProcessEventHook] Function  = RequestAddItem_ToServer Cheater ItemId: %i Count: %i  Object: 0x%X\n", AddItemParms->StaticItemId, AddItemParms->Count, Object);
+            logToFile("app.log", "[CMD::ProcessEventHook] Function  = RequestAddItem_ToServer Cheater ItemId: %i Count: %i  Object: 0x%X Actor: 0x%X raw_name: %s Object name: %s\n", AddItemParms->StaticItemId, AddItemParms->Count, Object);
+            logToFile("log\\RequestAddItem_ToServer.log", "[CMD::ProcessEventHook] Function  = RequestAddItem_ToServer Cheater ItemId: %i Count: %i  Object: 0x%X Actor: 0x%X raw_name: %s Object name: %s\n", AddItemParms->StaticItemId, AddItemParms->Count, Object);
             return;
         }
-        else if (!strcmp(Function->GetFullName().c_str(), "Function Pal.PalNetworkIndividualComponent.UpdateCharacterNickName_ToServer")) {
-            SDK::Params::UPalNetworkIndividualComponent_UpdateCharacterNickName_ToServer_Params* NewParms = (SDK::Params::UPalNetworkIndividualComponent_UpdateCharacterNickName_ToServer_Params*)Parms;
-            logToFile("app.log", "[CMD::ProcessEventHook] Function  = UpdateCharacterNickName_ToServer Cheater ID: %i NewNickName: %s  Object: 0x%X\n", NewParms->ID, NewParms->NewNickName.ToString().c_str(), Object);
-        }
+
+        //
         else if (containsSegment(Function->GetFullName().c_str(), "admin")) {
-            logToFile("app.log", "[CMD::ProcessEventHook] admin  = %s Object: 0x%X\n", Function->GetFullName().c_str(), Object);
+            logToFile("log\\admin.log", "[CMD::ProcessEventHook] admin  = %s Object: 0x%X\n", Function->GetFullName().c_str(), Object);
+            //return;
         }
+
+        //kill area fix   this command doesn't seem to be called from the client SendDeath_ToServer so we're able just to return to disable it
+        else if (!strcmp(Function->GetFullName().c_str(), "Function Pal.PalPlayerState.SendDeath_ToServer")) {
+            //g_Console->printdbg("[CMD::ProcessEventHook] _ToServer  = %s\n", g_Console->color.green, Function->GetFullName().c_str());
+            logToFile("log\\SendDeath_ToServer.log", "[CMD::ProcessEventHook] SendDeath_ToServer = %s  Object: 0x%X\n", Function->GetFullName().c_str(), Object);
+            return;
+        }
+
+        //this command doesn't seem to be called from the client
+        else if (!strcmp(Function->GetFullName().c_str(), "Function Pal.PalPlayerState.SendDamage_ToServer")) {
+            SDK::Params::APalPlayerState_SendDamage_ToServer_Params* NewParms = (SDK::Params::APalPlayerState_SendDamage_ToServer_Params*)Parms;
+            //g_Console->printdbg("[CMD::ProcessEventHook] _ToServer  = %s\n", g_Console->color.green, Function->GetFullName().c_str());
+            logToFile("log\\SendDamage_ToServer.log", "[CMD::ProcessEventHook] SendDamage_ToServer = %s  NativeDamageValue: %i Object: 0x%X\n", Function->GetFullName().c_str(), Object, NewParms->Info.NativeDamageValue);
+        }
+
+        //easier to remove unnecessary strings from showing up in the logs so you can see what is necessary
         else if (!strcmp(Function->GetFullName().c_str(), "Function Pal.PalOptionSubsystem.GetOptionWorldSettings") ||
             !strcmp(Function->GetFullName().c_str(), "Function BP_AudioSetting.BP_AudioSetting_C.SetAudioBusVolume") ||
             !strcmp(Function->GetFullName().c_str(), "Function BP_PalRandomIncidentSpawner.BP_PalRandomIncidentSpawner_C.ReceiveTick") ||
@@ -167,10 +184,17 @@ void  HookedProcessEvent(const SDK::UObject* Object, class SDK::UFunction* Funct
             !strcmp(Function->GetFullName().c_str(), "Function Pal.PalActionBase.OnBreakAction") ||
             !strcmp(Function->GetFullName().c_str(), "Function Pal.PalPlayerController.OnJump") ||
             !strcmp(Function->GetFullName().c_str(), "Function Pal.PalPlayerController.OnLanded") ||
+            !strcmp(Function->GetFullName().c_str(), "Function Pal.PalMapObject.BP_OnSetConcreteModel") ||
+            !strcmp(Function->GetFullName().c_str(), "Function BP_CascadeRiverTool.BP_CascadeRiverTool_C.ReceiveTick") ||
+            !strcmp(Function->GetFullName().c_str(), "Function BP_PalSpawner_Standard.BP_PalSpawner_Standard_C.BlueprintTick_Spawning") ||
+            !strcmp(Function->GetFullName().c_str(), "Function BP_PalPlayerController.BP_PalPlayerController_C.Regene_CustomEvent") ||
+            !strcmp(Function->GetFullName().c_str(), "Function BP_OtomoPalHolderComponent.BP_OtomoPalHolderComponent_C.ReceiveTick") ||
+
+
             containsSegment(Function->GetFullName().c_str(), "Function Pal.PalVisualEffectComponent") ||
             containsSegment(Function->GetFullName().c_str(), "Function Pal.PalStatusComponent") ||
             containsSegment(Function->GetFullName().c_str(), "Function BP_ActionRandomRest.BP_ActionRandomRest_C") ||
-            containsSegment(Function->GetFullName().c_str(), "Function Pal.PalNetworkTransmitter") ||
+            //containsSegment(Function->GetFullName().c_str(), "Function Pal.PalNetworkTransmitter") ||
             containsSegment(Function->GetFullName().c_str(), "Function BP_PlayerSoundEmitterComponent") ||
             containsSegment(Function->GetFullName().c_str(), "Function BP_PlayerSoundEmitterComponent.BP_PlayerSoundEmitterComponent_C") ||
             containsSegment(Function->GetFullName().c_str(), "Function BP_AIAction_WildLife.BP_AIAction_WildLife_C")) 
@@ -178,20 +202,32 @@ void  HookedProcessEvent(const SDK::UObject* Object, class SDK::UFunction* Funct
 
         }
         else if (containsSegment(Function->GetFullName().c_str(), "Function Pal.PalNetworkPlayerComponent")) {
-            logToFile("app.log", "[CMD::ProcessEventHook] PalNetworkPlayerComponent = % s Object : 0x%X\n", Function->GetFullName().c_str(), Object);
+            logToFile("log\\PalNetworkPlayerComponent.log", "[CMD::ProcessEventHook] PalNetworkPlayerComponent = % s Object : 0x%X\n", Function->GetFullName().c_str(), Object);
+        }
+        else if (containsSegment(Function->GetFullName().c_str(), "Function BP_PalPlayerController")) {
+                logToFile("log\\BP_PalPlayerController.log", "[CMD::ProcessEventHook] BP_PalPlayerController = % s Object : 0x%X\n", Function->GetFullName().c_str(), Object);
+        }
+        else if (containsSegment(Function->GetFullName().c_str(), "Function Pal.PalPlayerState")) {
+                    logToFile("log\\PalPlayerState.log", "[CMD::ProcessEventHook] PalPlayerState = % s Object : 0x%X\n", Function->GetFullName().c_str(), Object);
+
+        }
+        else if (containsSegment(Function->GetFullName().c_str(), "Function Pal.PalNetworkPlayerComponent")) {
+            logToFile("log\\PalNetworkPlayerComponent.log", "[CMD::ProcessEventHook] PalNetworkPlayerComponent = % s Object : 0x%X\n", Function->GetFullName().c_str(), Object);
         
         }
         else if (containsSegment(Function->GetFullName().c_str(), "Function Pal.PalPlayerController")) {
-            logToFile("app.log", "[CMD::ProcessEventHook] PalPlayerController = %s   Object: 0x%X\n", Function->GetFullName().c_str(), Object);
+            logToFile("log\\PalPlayerController.log", "[CMD::ProcessEventHook] PalPlayerController = %s   Object: 0x%X\n", Function->GetFullName().c_str(), Object);
         }
         else if (containsSegment(Function->GetFullName().c_str(), "Function Pal.PalNetworkMapObjectComponent.RequestDamageFoliage_ToServer")) {
             SDK::Params::UPalNetworkMapObjectComponent_RequestDamageFoliage_ToServer_Params* NewParms = (SDK::Params::UPalNetworkMapObjectComponent_RequestDamageFoliage_ToServer_Params*)Parms;
+            logToFile("log\\RequestDamageFoliage_ToServer.log", "[CMD::ProcessEventHook] RequestDamageFoliage_ToServer = %s   Object: 0x%X\n", Function->GetFullName().c_str(), Object);
+            //NewParms.
         }
-        //else if (containsSegment(Function->GetFullName().c_str(), "_ToServer")) {
-        //    //g_Console->printdbg("[CMD::ProcessEventHook] _ToServer  = %s\n", //g_Console->color.green, Function->GetFullName().c_str());
-        //}
-        //else //g_Console->printdbg("[CMD::ProcessEventHook] Function  = %s\n", //g_Console->color.green, Function->GetFullName().c_str());
-    
+        else if (containsSegment(Function->GetFullName().c_str(), "_ToServer")) {
+            //g_Console->printdbg("[CMD::ProcessEventHook] _ToServer  = %s\n", //g_Console->color.green, Function->GetFullName().c_str());
+            logToFile("log\\ToServer.log", "[CMD::ProcessEventHook] ToServer = %s   Object: 0x%X\n", Function->GetFullName().c_str(), Object);
+        }else logToFile("log\\ac-all-Function.log", "[CMD::ProcessEventHook] Function  = %s   Object: 0x%X\n", Function->GetFullName().c_str(), Object);
+      
     pProcessEvent(Object, Function, Parms);
 }
 
